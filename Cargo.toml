@@ -1,0 +1,23 @@
+[package]
+name = "starkom-ff"
+version = "1.0.0"
+description = "Finite field infrastructure for cryptographic applications."
+license = "Apache-2.0"
+repository = "https://github.com/libernet-xyz/ff.git"
+readme = "README.md"
+edition = "2024"
+
+[lib]
+crate-type = ["rlib", "cdylib"]
+
+[dependencies]
+anyhow = "1.0.102"
+getrandom = { version = "0.4.3", features = ["wasm_js"] }
+getrandom_old = { package = "getrandom", version = "0.2.17", features = ["js"] }
+primitive-types = "0.14.0"
+rand_core = "0.10.1"
+subtle = "2.6.1"
+
+[dev-dependencies]
+blstrs = "0.7.1"
+ff = "0.13.1"
