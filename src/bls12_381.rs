@@ -2613,45 +2613,20 @@ mod tests {
 
     #[test]
     fn test_root_of_unity() {
-        let rou = Scalar::ROOT_OF_UNITY;
-        let one = Scalar::ONE;
         assert_eq!(
-            rou.to_string(),
+            Scalar::ROOT_OF_UNITY.to_string(),
             format_blst_scalar(<BlstScalar as ff::PrimeField>::ROOT_OF_UNITY)
         );
-        assert_ne!(rou.pow(from_const(1u64 << 0)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 1)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 2)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 3)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 4)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 5)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 6)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 7)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 8)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 9)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 10)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 11)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 12)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 13)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 14)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 15)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 16)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 17)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 18)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 19)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 20)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 21)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 22)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 23)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 24)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 25)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 26)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 27)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 28)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 29)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 30)), one);
-        assert_ne!(rou.pow(from_const(1u64 << 31)), one);
-        assert_eq!(rou.pow(from_const(1u64 << 32)), one);
+        for i in 0..Scalar::S {
+            assert_ne!(
+                Scalar::ROOT_OF_UNITY.pow(from_const(1u64 << i)),
+                Scalar::ONE
+            );
+        }
+        assert_eq!(
+            Scalar::ROOT_OF_UNITY.pow(from_const(1u64 << Scalar::S)),
+            Scalar::ONE
+        );
     }
 
     #[test]
@@ -2674,7 +2649,7 @@ mod tests {
         );
         assert_eq!(
             Scalar::DELTA,
-            Scalar::MULTIPLICATIVE_GENERATOR.pow(from_const(1u64 << 32))
+            Scalar::MULTIPLICATIVE_GENERATOR.pow(from_const(1u64 << Scalar::S))
         );
     }
 }
