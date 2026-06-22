@@ -1899,7 +1899,7 @@ mod tests {
     }
 
     #[test]
-    fn test_small_power_const_time() {
+    fn test_small_power_vartime() {
         assert_eq!(from_const(0).pow_small_vartime(0), from_const(1));
         assert_eq!(from_const(0).pow_small_vartime(1), from_const(0));
         assert_eq!(from_const(0).pow_small_vartime(2), from_const(0));
