@@ -140,14 +140,17 @@ pub trait Field:
     fn invert_vartime(&self) -> Option<Self>;
 
     /// Raises this value to `exp`, running exactly [`Self::NUM_BITS`] squares and multiplications
-    /// so that an observer cannot infer the exponent.
+    /// so that a time observer cannot infer the exponent.
     fn pow(self, exp: Self) -> Self;
 
+    /// Raises this value to `exp`.
+    fn pow_vartime(self, exp: Self) -> Self;
+
     /// Raises this value to `exp`, running exactly [`usize::BITS`] squares and multiplications so
-    /// that an observer cannot infer the exponent.
+    /// that a time observer cannot infer the exponent.
     ///
-    /// Unlike [`Field::pow_const_time`], `exp` is a `usize`. That makes the algorithm significantly
-    /// faster because the square-and-multiply loop runs only [`usize::BITS`] times rather than
+    /// Unlike [`Field::pow`], `exp` is a `usize`. That makes the algorithm significantly faster
+    /// because the square-and-multiply loop runs only [`usize::BITS`] times rather than
     /// [`Field::BITS`] times, and bitwise operations on the exponent are native.
     fn pow_small(mut self, mut exp: usize) -> Self {
         let mut result = Self::ONE;
@@ -161,13 +164,76 @@ pub trait Field:
     }
 
     /// Raises this value to `exp`.
-    fn pow_vartime(self, exp: Self) -> Self;
-
-    /// Raises this value to `exp`.
     ///
     /// Unlike [`Field::pow`], `exp` is a `usize`. That makes the algorithm significantly faster
     /// because bitwise operations on the exponent are native.
     fn pow_small_vartime(mut self, mut exp: usize) -> Self {
+        let mut result = Self::ONE;
+        while exp != 0 {
+            if (exp & 1) != 0 {
+                result *= self;
+            }
+            exp >>= 1;
+            self = self.square();
+        }
+        result
+    }
+
+    /// Raises this value to `exp`, running exactly [`u32::BITS`] squares and multiplications so
+    /// that an observer cannot infer the exponent.
+    ///
+    /// Unlike [`Field::pow`], `exp` is a `u32`. That makes the algorithm significantly faster
+    /// because the square-and-multiply loop runs only 32 times rather than [`Field::BITS`] times,
+    /// and bitwise operations on the exponent are native.
+    fn pow_u32(mut self, mut exp: u32) -> Self {
+        let mut result = Self::ONE;
+        for _ in 0..u32::BITS {
+            let product = result * self;
+            result = Self::conditional_select(&result, &product, Choice::from((exp & 1) as u8));
+            exp >>= 1;
+            self = self.square();
+        }
+        result
+    }
+
+    /// Raises this value to `exp`.
+    ///
+    /// Unlike [`Field::pow_vartime`], `exp` is a `u32`. That makes the algorithm significantly
+    /// faster because bitwise operations on the exponent are native.
+    fn pow_u32_vartime(mut self, mut exp: u32) -> Self {
+        let mut result = Self::ONE;
+        while exp != 0 {
+            if (exp & 1) != 0 {
+                result *= self;
+            }
+            exp >>= 1;
+            self = self.square();
+        }
+        result
+    }
+
+    /// Raises this value to `exp`, running exactly [`u64::BITS`] squares and multiplications so
+    /// that an observer cannot infer the exponent.
+    ///
+    /// Unlike [`Field::pow`], `exp` is a `u64`. That makes the algorithm significantly faster
+    /// because the square-and-multiply loop runs only 64 times rather than [`Field::BITS`] times,
+    /// and bitwise operations on the exponent are native.
+    fn pow_u64(mut self, mut exp: u64) -> Self {
+        let mut result = Self::ONE;
+        for _ in 0..u64::BITS {
+            let product = result * self;
+            result = Self::conditional_select(&result, &product, Choice::from((exp & 1) as u8));
+            exp >>= 1;
+            self = self.square();
+        }
+        result
+    }
+
+    /// Raises this value to `exp`.
+    ///
+    /// Unlike [`Field::pow_vartime`], `exp` is a `u64`. That makes the algorithm significantly
+    /// faster because bitwise operations on the exponent are native.
+    fn pow_u64_vartime(mut self, mut exp: u64) -> Self {
         let mut result = Self::ONE;
         while exp != 0 {
             if (exp & 1) != 0 {

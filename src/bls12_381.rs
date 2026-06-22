@@ -1871,20 +1871,6 @@ mod tests {
     }
 
     #[test]
-    fn test_small_power() {
-        assert_eq!(from_const(0).pow_small(0), from_const(1));
-        assert_eq!(from_const(0).pow_small(1), from_const(0));
-        assert_eq!(from_const(0).pow_small(2), from_const(0));
-        assert_eq!(from_const(1).pow_small(0), from_const(1));
-        assert_eq!(from_const(1).pow_small(1), from_const(1));
-        assert_eq!(from_const(1).pow_small(2), from_const(1));
-        assert_eq!(from_const(2).pow_small(0), from_const(1));
-        assert_eq!(from_const(2).pow_small(1), from_const(2));
-        assert_eq!(from_const(2).pow_small(2), from_const(4));
-        assert_eq!(from_const(2).pow_small(3), from_const(8));
-    }
-
-    #[test]
     fn test_power_vartime() {
         assert_eq!(from_const(0).pow_vartime(from_const(0)), from_const(1));
         assert_eq!(from_const(0).pow_vartime(from_const(1)), from_const(0));
@@ -1899,6 +1885,20 @@ mod tests {
     }
 
     #[test]
+    fn test_small_power() {
+        assert_eq!(from_const(0).pow_small(0), from_const(1));
+        assert_eq!(from_const(0).pow_small(1), from_const(0));
+        assert_eq!(from_const(0).pow_small(2), from_const(0));
+        assert_eq!(from_const(1).pow_small(0), from_const(1));
+        assert_eq!(from_const(1).pow_small(1), from_const(1));
+        assert_eq!(from_const(1).pow_small(2), from_const(1));
+        assert_eq!(from_const(2).pow_small(0), from_const(1));
+        assert_eq!(from_const(2).pow_small(1), from_const(2));
+        assert_eq!(from_const(2).pow_small(2), from_const(4));
+        assert_eq!(from_const(2).pow_small(3), from_const(8));
+    }
+
+    #[test]
     fn test_small_power_vartime() {
         assert_eq!(from_const(0).pow_small_vartime(0), from_const(1));
         assert_eq!(from_const(0).pow_small_vartime(1), from_const(0));
@@ -1910,6 +1910,62 @@ mod tests {
         assert_eq!(from_const(2).pow_small_vartime(1), from_const(2));
         assert_eq!(from_const(2).pow_small_vartime(2), from_const(4));
         assert_eq!(from_const(2).pow_small_vartime(3), from_const(8));
+    }
+
+    #[test]
+    fn test_u32_power() {
+        assert_eq!(from_const(0).pow_u32(0), from_const(1));
+        assert_eq!(from_const(0).pow_u32(1), from_const(0));
+        assert_eq!(from_const(0).pow_u32(2), from_const(0));
+        assert_eq!(from_const(1).pow_u32(0), from_const(1));
+        assert_eq!(from_const(1).pow_u32(1), from_const(1));
+        assert_eq!(from_const(1).pow_u32(2), from_const(1));
+        assert_eq!(from_const(2).pow_u32(0), from_const(1));
+        assert_eq!(from_const(2).pow_u32(1), from_const(2));
+        assert_eq!(from_const(2).pow_u32(2), from_const(4));
+        assert_eq!(from_const(2).pow_u32(3), from_const(8));
+    }
+
+    #[test]
+    fn test_u32_power_vartime() {
+        assert_eq!(from_const(0).pow_u32_vartime(0), from_const(1));
+        assert_eq!(from_const(0).pow_u32_vartime(1), from_const(0));
+        assert_eq!(from_const(0).pow_u32_vartime(2), from_const(0));
+        assert_eq!(from_const(1).pow_u32_vartime(0), from_const(1));
+        assert_eq!(from_const(1).pow_u32_vartime(1), from_const(1));
+        assert_eq!(from_const(1).pow_u32_vartime(2), from_const(1));
+        assert_eq!(from_const(2).pow_u32_vartime(0), from_const(1));
+        assert_eq!(from_const(2).pow_u32_vartime(1), from_const(2));
+        assert_eq!(from_const(2).pow_u32_vartime(2), from_const(4));
+        assert_eq!(from_const(2).pow_u32_vartime(3), from_const(8));
+    }
+
+    #[test]
+    fn test_u64_power() {
+        assert_eq!(from_const(0).pow_u64(0), from_const(1));
+        assert_eq!(from_const(0).pow_u64(1), from_const(0));
+        assert_eq!(from_const(0).pow_u64(2), from_const(0));
+        assert_eq!(from_const(1).pow_u64(0), from_const(1));
+        assert_eq!(from_const(1).pow_u64(1), from_const(1));
+        assert_eq!(from_const(1).pow_u64(2), from_const(1));
+        assert_eq!(from_const(2).pow_u64(0), from_const(1));
+        assert_eq!(from_const(2).pow_u64(1), from_const(2));
+        assert_eq!(from_const(2).pow_u64(2), from_const(4));
+        assert_eq!(from_const(2).pow_u64(3), from_const(8));
+    }
+
+    #[test]
+    fn test_u64_power_vartime() {
+        assert_eq!(from_const(0).pow_u64_vartime(0), from_const(1));
+        assert_eq!(from_const(0).pow_u64_vartime(1), from_const(0));
+        assert_eq!(from_const(0).pow_u64_vartime(2), from_const(0));
+        assert_eq!(from_const(1).pow_u64_vartime(0), from_const(1));
+        assert_eq!(from_const(1).pow_u64_vartime(1), from_const(1));
+        assert_eq!(from_const(1).pow_u64_vartime(2), from_const(1));
+        assert_eq!(from_const(2).pow_u64_vartime(0), from_const(1));
+        assert_eq!(from_const(2).pow_u64_vartime(1), from_const(2));
+        assert_eq!(from_const(2).pow_u64_vartime(2), from_const(4));
+        assert_eq!(from_const(2).pow_u64_vartime(3), from_const(8));
     }
 
     #[test]
