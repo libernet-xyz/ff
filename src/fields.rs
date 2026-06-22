@@ -88,7 +88,7 @@ pub trait Field:
 
     /// Compares with zero.
     fn is_zero(&self) -> Choice {
-        ((*self == Self::ZERO) as u8).into()
+        self.ct_eq(&Self::ZERO)
     }
 
     /// Returns true iff the value is even.
@@ -124,10 +124,7 @@ pub trait Field:
     }
 
     /// Returns the modular inverse of `self, or `None` if `self` is zero.
-    fn invert(&self) -> Option<Self>;
-
-    /// Returns the modular inverse of `self, or `None` if `self` is zero.
-    fn invert_const_time(&self) -> CtOption<Self>;
+    fn invert(&self) -> CtOption<Self>;
 
     /// Returns the modular inverse of `self`, assuming `self` is not zero and panicking otherwise.
     fn invert_unwrap(&self) -> Self {
@@ -139,14 +136,38 @@ pub trait Field:
         self.invert().unwrap_or(Self::ZERO)
     }
 
-    /// Raises this value to `exp`.
+    /// Returns the modular inverse of `self, or `None` if `self` is zero.
+    fn invert_vartime(&self) -> Option<Self>;
+
+    /// Raises this value to `exp`, running exactly [`Self::NUM_BITS`] squares and multiplications
+    /// so that an observer cannot infer the exponent.
     fn pow(self, exp: Self) -> Self;
+
+    /// Raises this value to `exp`, running exactly [`usize::BITS`] squares and multiplications so
+    /// that an observer cannot infer the exponent.
+    ///
+    /// Unlike [`Field::pow_const_time`], `exp` is a `usize`. That makes the algorithm significantly
+    /// faster because the square-and-multiply loop runs only [`usize::BITS`] times rather than
+    /// [`Field::BITS`] times, and bitwise operations on the exponent are native.
+    fn pow_small(mut self, mut exp: usize) -> Self {
+        let mut result = Self::ONE;
+        for _ in 0..usize::BITS {
+            let product = result * self;
+            result = Self::conditional_select(&result, &product, Choice::from((exp & 1) as u8));
+            exp >>= 1;
+            self = self.square();
+        }
+        result
+    }
+
+    /// Raises this value to `exp`.
+    fn pow_vartime(self, exp: Self) -> Self;
 
     /// Raises this value to `exp`.
     ///
     /// Unlike [`Field::pow`], `exp` is a `usize`. That makes the algorithm significantly faster
     /// because bitwise operations on the exponent are native.
-    fn pow_small(mut self, mut exp: usize) -> Self {
+    fn pow_small_vartime(mut self, mut exp: usize) -> Self {
         let mut result = Self::ONE;
         while exp != 0 {
             if (exp & 1) != 0 {
@@ -158,44 +179,23 @@ pub trait Field:
         result
     }
 
-    /// Raises this value to `exp`, running exactly [`Self::NUM_BITS`] squares and multiplications
-    /// so that an observer cannot infer the exponent.
-    fn pow_const_time(self, exp: Self) -> Self;
-
-    /// Raises this value to `exp`, running exactly [`usize::BITS`] squares and multiplications so
-    /// that an observer cannot infer the exponent.
-    ///
-    /// Unlike [`Field::pow_const_time`], `exp` is a `usize`. That makes the algorithm significantly
-    /// faster because the square-and-multiply loop runs only [`usize::BITS`] times rather than
-    /// [`Field::BITS`] times, and bitwise operations on the exponent are native.
-    fn pow_small_const_time(mut self, mut exp: usize) -> Self {
-        let mut result = Self::ONE;
-        for _ in 0..usize::BITS {
-            let product = result * self;
-            result = Self::conditional_select(&result, &product, Choice::from((exp & 1) as u8));
-            exp >>= 1;
-            self = self.square();
-        }
-        result
-    }
-
-    /// Performs integer division by `rhs`, returning a pair of (quotient, remainder) or `None` if
-    /// `rhs` is zero.
-    fn div_int(&self, rhs: &Self) -> Option<(Self, Self)>;
+    /// Performs integer division by `rhs` and returns a (quotient, remainder) pair. Panics if `rhs`
+    /// is zero.
+    fn div_int(&self, rhs: &Self) -> (Self, Self);
 
     /// Constructs a scalar from the little-endian byte representation of an integer.
     ///
     /// The provided slice must have exactly [`Self::LEN`] bytes.
     ///
     /// The function returns `None` if the integer lies outside the field range.
-    fn try_from_le_bytes(bytes: &[u8]) -> Option<Self>;
+    fn try_from_le_bytes(bytes: &[u8]) -> CtOption<Self>;
 
     /// Constructs a scalar from the big-endian byte representation of an integer.
     ///
     /// The provided slice must have exactly [`Self::LEN`] bytes.
     ///
     /// The function returns `None` if the integer lies outside the field range.
-    fn try_from_be_bytes(bytes: &[u8]) -> Option<Self>;
+    fn try_from_be_bytes(bytes: &[u8]) -> CtOption<Self>;
 
     /// Parses a scalar from its text representation in the given `radix`.
     ///
@@ -239,7 +239,7 @@ pub trait Field64: Field + From<u32> + TryFrom<u64> {
     fn from_u256_mod_n(u256: U256) -> Self;
 
     /// Returns this scalar as a `u32`, or `None` if the value exceeds the 32-bit range.
-    fn try_to_u32(&self) -> Option<u32>;
+    fn try_to_u32(&self) -> CtOption<u32>;
 
     /// Converts the scalar to a 64-bit unsigned integer.
     fn to_u64(&self) -> u64;
@@ -273,13 +273,13 @@ pub trait Field256: Field + From<u32> + From<u64> + From<u128> + TryFrom<U256> {
     fn from_h512(h512: H512) -> Self;
 
     /// Returns this scalar as a `u32`, or `None` if the value exceeds the 32-bit range.
-    fn try_to_u32(&self) -> Option<u32>;
+    fn try_to_u32(&self) -> CtOption<u32>;
 
     /// Returns this scalar as a `u64`, or `None` if the value exceeds the 64-bit range.
-    fn try_to_u64(&self) -> Option<u64>;
+    fn try_to_u64(&self) -> CtOption<u64>;
 
     /// Returns this scalar as a `u128`, or `None` if the value exceeds the 128-bit range.
-    fn try_to_u128(&self) -> Option<u128>;
+    fn try_to_u128(&self) -> CtOption<u128>;
 
     /// Returns this scalar as a [`U256`].
     fn to_u256(&self) -> U256;
