@@ -1,6 +1,6 @@
 [package]
 name = "starkom-ff"
-version = "2.2.0"
+version = "2.3.0"
 description = "Finite field infrastructure for cryptographic applications."
 license = "Apache-2.0"
 repository = "https://github.com/libernet-xyz/ff.git"
