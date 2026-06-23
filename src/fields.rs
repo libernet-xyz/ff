@@ -57,6 +57,7 @@ pub trait Field:
     + FromStr
     + From<u8>
     + From<u16>
+    + TryFrom<usize>
 {
     /// The number of bytes required to represent a value.
     const LEN: usize;
