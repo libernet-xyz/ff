@@ -57,7 +57,7 @@ pub trait Field:
     + FromStr
     + From<u8>
     + From<u16>
-    + TryFrom<usize>
+    + TryFrom<usize, Error: Debug>
 {
     /// The number of bytes required to represent a value.
     const LEN: usize;
@@ -290,7 +290,7 @@ pub trait Field:
 }
 
 /// A ~64-bit [`Field`].
-pub trait Field64: Field + From<u32> + TryFrom<u64> {
+pub trait Field64: Field + From<u32> + TryFrom<u64, Error: Debug> {
     /// Returns the little-endian representation of the scalar.
     fn to_le_bytes(&self) -> [u8; 8];
 
@@ -322,7 +322,9 @@ pub trait Field64: Field + From<u32> + TryFrom<u64> {
 }
 
 /// A ~256-bit [`Field`].
-pub trait Field256: Field + From<u32> + From<u64> + From<u128> + TryFrom<U256> {
+pub trait Field256:
+    Field + From<u32> + From<u64> + From<u128> + TryFrom<U256, Error: Debug>
+{
     /// Returns the little-endian representation of the scalar.
     fn to_le_bytes(&self) -> [u8; 32];
 
