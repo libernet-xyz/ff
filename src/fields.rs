@@ -140,6 +140,42 @@ pub trait Field:
     /// Returns the modular inverse of `self, or `None` if `self` is zero.
     fn invert_vartime(&self) -> Option<Self>;
 
+    /// Inverts all the provided values in place using Montgomery batch inversion.
+    ///
+    /// As with [`Self::invert_unwrap`], this function panics if any of the `values` is zero.
+    fn invert_batch(values: &mut [Self]) {
+        let length = values.len();
+        let mut partial_products = vec![Self::ONE; length];
+        let mut accumulator = Self::ONE;
+        for i in 0..length {
+            partial_products[i] = accumulator;
+            accumulator *= values[i];
+        }
+        let mut inverse = accumulator.invert_unwrap();
+        for i in (0..length).rev() {
+            let input = values[i];
+            values[i] = partial_products[i] * inverse;
+            inverse *= input;
+        }
+    }
+
+    /// Vartime version of [`Self::invert_batch`].
+    fn invert_batch_vartime(values: &mut [Self]) {
+        let length = values.len();
+        let mut partial_products = vec![Self::ONE; length];
+        let mut accumulator = Self::ONE;
+        for i in 0..length {
+            partial_products[i] = accumulator;
+            accumulator *= values[i];
+        }
+        let mut inverse = accumulator.invert_vartime().unwrap();
+        for i in (0..length).rev() {
+            let input = values[i];
+            values[i] = partial_products[i] * inverse;
+            inverse *= input;
+        }
+    }
+
     /// Raises this value to `exp`, running exactly [`Self::NUM_BITS`] squares and multiplications
     /// so that a time observer cannot infer the exponent.
     fn pow(self, exp: Self) -> Self;
@@ -402,3 +438,18 @@ pub trait PrimeField64: Field64 + PrimeField {}
 
 /// A ~256-bit prime field.
 pub trait PrimeField256: Field256 + PrimeField {}
+
+/// Describes a prime field with a (3^T)-th root of unity.
+pub trait ThreeAdicField: PrimeField {
+    /// The 3-adicity of the field.
+    const T: usize;
+
+    /// Inverse of 3 in the field.
+    const THREE_INV: Self;
+
+    /// The primitive 3-adic root of unity, a number w such that w^(3^T) = 1.
+    const THREE_ADIC_ROOT_OF_UNITY: Self;
+
+    /// The inverse of the root of unity.
+    const THREE_ADIC_ROOT_OF_UNITY_INV: Self;
+}
