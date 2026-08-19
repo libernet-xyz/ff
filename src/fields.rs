@@ -140,6 +140,42 @@ pub trait Field:
     /// Returns the modular inverse of `self, or `None` if `self` is zero.
     fn invert_vartime(&self) -> Option<Self>;
 
+    /// Inverts all the provided values in place using Montgomery batch inversion.
+    ///
+    /// As with [`Self::invert_unwrap`], this function panics if any of the `values` is zero.
+    fn invert_batch(values: &mut [Self]) {
+        let length = values.len();
+        let mut partial_products = vec![Self::ONE; length];
+        let mut accumulator = Self::ONE;
+        for i in 0..length {
+            partial_products[i] = accumulator;
+            accumulator *= values[i];
+        }
+        let mut inverse = accumulator.invert_unwrap();
+        for i in (0..length).rev() {
+            let input = values[i];
+            values[i] = partial_products[i] * inverse;
+            inverse *= input;
+        }
+    }
+
+    /// Vartime version of [`Self::invert_batch`].
+    fn invert_batch_vartime(values: &mut [Self]) {
+        let length = values.len();
+        let mut partial_products = vec![Self::ONE; length];
+        let mut accumulator = Self::ONE;
+        for i in 0..length {
+            partial_products[i] = accumulator;
+            accumulator *= values[i];
+        }
+        let mut inverse = accumulator.invert_vartime().unwrap();
+        for i in (0..length).rev() {
+            let input = values[i];
+            values[i] = partial_products[i] * inverse;
+            inverse *= input;
+        }
+    }
+
     /// Raises this value to `exp`, running exactly [`Self::NUM_BITS`] squares and multiplications
     /// so that a time observer cannot infer the exponent.
     fn pow(self, exp: Self) -> Self;
