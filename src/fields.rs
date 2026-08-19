@@ -402,3 +402,18 @@ pub trait PrimeField64: Field64 + PrimeField {}
 
 /// A ~256-bit prime field.
 pub trait PrimeField256: Field256 + PrimeField {}
+
+/// Describes a prime field with a (3^T)-th root of unity.
+pub trait ThreeAdicField: PrimeField {
+    /// The 3-adicity of the field.
+    const T: usize;
+
+    /// Inverse of 3 in the field.
+    const THREE_INV: Self;
+
+    /// The primitive 3-adic root of unity, a number w such that w^(3^T) = 1.
+    const THREE_ADIC_ROOT_OF_UNITY: Self;
+
+    /// The inverse of the root of unity.
+    const THREE_ADIC_ROOT_OF_UNITY_INV: Self;
+}
