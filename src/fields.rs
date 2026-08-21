@@ -1,4 +1,4 @@
-use primitive_types::{H512, U256, U512};
+use primitive_types::{H256, H512, U256, U512};
 use rand_core::{CryptoRng, TryCryptoRng};
 use std::fmt::{Binary, Debug, Display, LowerHex, Octal, UpperHex};
 use std::iter::{Product, Sum};
@@ -357,6 +357,40 @@ pub trait Field64: Field + From<u32> + TryFrom<u64, Error: Debug> {
     fn to_u512(&self) -> U512;
 }
 
+/// A ~128-bit [`Field`].
+pub trait Field128: Field + From<u32> + From<u64> + TryFrom<u128, Error: Debug> {
+    /// Returns the little-endian representation of the scalar.
+    fn to_le_bytes(&self) -> [u8; 16];
+
+    /// Returns the big-endian representation of the scalar.
+    fn to_be_bytes(&self) -> [u8; 16];
+
+    /// Constructs a scalar from a 256-bit unsigned value, using modular reduction to fit it into
+    /// the scalar range.
+    fn from_u256_mod_n(u256: U256) -> Self;
+
+    /// Constructs a scalar from an [`H256`].
+    ///
+    /// This function works by converting the [`H256`] to a [`U256`] using little-endian byte order
+    /// and then calling [`Self::from_u256_mod_n`].
+    fn from_h256(h256: H256) -> Self;
+
+    /// Returns this scalar as a `u32`, or `None` if the value exceeds the 32-bit range.
+    fn try_to_u32(&self) -> CtOption<u32>;
+
+    /// Returns this scalar as a `u64`, or `None` if the value exceeds the 64-bit range.
+    fn try_to_u64(&self) -> CtOption<u64>;
+
+    /// Returns this scalar as a `u128`.
+    fn to_u128(&self) -> u128;
+
+    /// Returns this scalar as a [`U256`].
+    fn to_u256(&self) -> U256;
+
+    /// Returns this scalar as a [`U512`].
+    fn to_u512(&self) -> U512;
+}
+
 /// A ~256-bit [`Field`].
 pub trait Field256:
     Field + From<u32> + From<u64> + From<u128> + TryFrom<U256, Error: Debug>
@@ -435,6 +469,9 @@ pub trait PrimeField: Field {
 
 /// A ~64-bit prime field.
 pub trait PrimeField64: Field64 + PrimeField {}
+
+/// A ~128-bit prime field.
+pub trait PrimeField128: Field128 + PrimeField {}
 
 /// A ~256-bit prime field.
 pub trait PrimeField256: Field256 + PrimeField {}
