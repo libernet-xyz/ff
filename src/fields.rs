@@ -59,6 +59,11 @@ pub trait Field:
     + From<u16>
     + TryFrom<usize, Error: Debug>
 {
+    /// The cardinality of the field.
+    ///
+    /// Must be consistent with the [`Self::MAX`] constant.
+    const MODULUS: &'static str;
+
     /// The number of bytes required to represent a value.
     const LEN: usize;
 
@@ -432,11 +437,6 @@ pub trait Field256:
 /// This kind of field has certain mathematical properties that are very useful in cryptographic
 /// applications. Notably, Fermat's Little Theorem holds.
 pub trait PrimeField: Field {
-    /// The prime order of the field.
-    ///
-    /// Must be consistent with the [`Field::MAX`] constant.
-    const MODULUS: &'static str;
-
     /// The 2-adicity of the field, which is the exponent of 2 in the factorization of p-1.
     const S: usize;
 
