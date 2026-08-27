@@ -64,6 +64,15 @@ pub trait Field:
     /// Must be consistent with the [`Self::MAX`] constant.
     const MODULUS: &'static str;
 
+    /// The characteristic of the field, ie. the smallest positive integer `n` such that
+    /// `n * Self::ONE == Self::ZERO`.
+    ///
+    /// This is always a prime number, and [`Self::MODULUS`] is always a power of it (possibly the
+    /// first power, in which case the two constants coincide): a prime field has
+    /// `CHARACTERISTIC == MODULUS`, while an extension field of degree `n` over a field of
+    /// characteristic `p` has `MODULUS == p^n` and `CHARACTERISTIC == p`.
+    const CHARACTERISTIC: &'static str;
+
     /// The number of bytes required to represent a value.
     const LEN: usize;
 
@@ -79,7 +88,7 @@ pub trait Field:
     /// The multiplicative identity element.
     const ONE: Self;
 
-    /// The largest value in the field.
+    /// The largest value in the field. Must be `MODULUS - 1`.
     const MAX: Self;
 
     /// The 2-adicity of the field, ie. the exponent of 2 in the factorization of `MODULUS - 1`,

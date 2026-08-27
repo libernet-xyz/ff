@@ -611,6 +611,9 @@ impl Field for Scalar {
     const MODULUS: &'static str =
         "0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001";
 
+    const CHARACTERISTIC: &'static str =
+        "0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001";
+
     const LEN: usize = 32;
 
     const ZERO: Self = Self(0, 0, 0, 0);
@@ -979,6 +982,10 @@ mod tests {
     #[test]
     fn test_modulus() {
         assert_eq!(Scalar::MODULUS, <BlstScalar as ff::PrimeField>::MODULUS);
+        assert_eq!(
+            Scalar::CHARACTERISTIC,
+            <BlstScalar as ff::PrimeField>::MODULUS
+        );
     }
 
     #[test]
