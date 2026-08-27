@@ -922,7 +922,6 @@ impl PrimeField256 for Scalar {}
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::PrimeField;
     use blstrs::Scalar as BlstScalar;
     use ff;
 
@@ -2149,9 +2148,7 @@ mod tests {
             Scalar::from_str_radix("7175551651451472765101463473002004641660025235732200277777133775777777777740000000000", 8).unwrap(),
             Scalar::MAX
         );
-        assert!(
-            Scalar::from_str_radix("7175551651451472765101463473002004641660025235732200277777133775777777777740000000001", 8).is_err(),
-        );
+        assert!(Scalar::from_str_radix("7175551651451472765101463473002004641660025235732200277777133775777777777740000000001", 8).is_err());
     }
 
     #[test]
@@ -2427,7 +2424,7 @@ mod tests {
                 "73EDA753299D7D483339D80809A1D80553BDA402FFFE5BFEFFFFFFFF00000001",
                 16
             )
-            .is_err(),
+            .is_err()
         );
     }
 
