@@ -64,6 +64,15 @@ pub trait Field:
     /// Must be consistent with the [`Self::MAX`] constant.
     const MODULUS: &'static str;
 
+    /// The characteristic of the field, ie. the smallest positive integer `n` such that
+    /// `n * Self::ONE == Self::ZERO`.
+    ///
+    /// This is always a prime number, and [`Self::MODULUS`] is always a power of it (possibly the
+    /// first power, in which case the two constants coincide): a prime field has
+    /// `CHARACTERISTIC == MODULUS`, while an extension field of degree `n` over a field of
+    /// characteristic `p` has `MODULUS == p^n` and `CHARACTERISTIC == p`.
+    const CHARACTERISTIC: &'static str;
+
     /// The number of bytes required to represent a value.
     const LEN: usize;
 
@@ -79,8 +88,40 @@ pub trait Field:
     /// The multiplicative identity element.
     const ONE: Self;
 
-    /// The largest value in the field.
+    /// The largest value in the field. Must be `MODULUS - 1`.
     const MAX: Self;
+
+    /// The 2-adicity of the field, ie. the exponent of 2 in the factorization of `MODULUS - 1`,
+    /// the order of the field's multiplicative group.
+    const S: usize;
+
+    /// A fixed generator of the field's multiplicative group, which always has `MODULUS - 1`
+    /// elements and is always cyclic. This element must also be a quadratic nonresidue.
+    ///
+    /// Implementations of this trait MUST ensure that this is the generator used to derive
+    /// [`Self::ROOT_OF_UNITY`].
+    const MULTIPLICATIVE_GENERATOR: Self;
+
+    /// `MODULUS - 2`, the exponent used for inversion by exponentiation: since
+    /// `x^(MODULUS - 1) = 1` for every nonzero `x` (Lagrange's theorem applied to the field's
+    /// multiplicative group), it follows that `x^(MODULUS - 2) = x^-1`.
+    const MINUS_TWO: Self;
+
+    /// The multiplicative inverse of 2.
+    const TWO_INV: Self;
+
+    /// A primitive `2^S`-th root of unity, ie. a generator of the order-`2^S` subgroup of the
+    /// field's multiplicative group.
+    const ROOT_OF_UNITY: Self;
+
+    /// The modular inverse of [`Self::ROOT_OF_UNITY`].
+    const ROOT_OF_UNITY_INV: Self;
+
+    /// Generator of the order-`t` multiplicative subgroup, where `t` is the odd part of
+    /// `MODULUS - 1`, ie. `MODULUS - 1 = 2^S * t`.
+    ///
+    /// It can be calculated by exponentiating [`Self::MULTIPLICATIVE_GENERATOR`] by `2^S`.
+    const DELTA: Self;
 
     /// Returns the element zero.
     fn zero() -> Self {
@@ -330,6 +371,21 @@ pub trait Field:
     fn try_to_u16(&self) -> Option<u16>;
 }
 
+/// Describes a field with a (3^T)-th root of unity.
+pub trait ThreeAdicField: Field {
+    /// The 3-adicity of the field.
+    const T: usize;
+
+    /// Inverse of 3 in the field.
+    const THREE_INV: Self;
+
+    /// The primitive 3-adic root of unity, a number w such that w^(3^T) = 1.
+    const THREE_ADIC_ROOT_OF_UNITY: Self;
+
+    /// The inverse of the root of unity.
+    const THREE_ADIC_ROOT_OF_UNITY_INV: Self;
+}
+
 /// A ~64-bit [`Field`].
 pub trait Field64: Field + From<u32> + TryFrom<u64, Error: Debug> {
     /// Returns the little-endian representation of the scalar.
@@ -432,40 +488,9 @@ pub trait Field256:
     fn to_u512(&self) -> U512;
 }
 
-/// A [`Field`] whose order is a prime number.
-///
-/// This kind of field has certain mathematical properties that are very useful in cryptographic
-/// applications. Notably, Fermat's Little Theorem holds.
-pub trait PrimeField: Field {
-    /// The 2-adicity of the field, which is the exponent of 2 in the factorization of p-1.
-    const S: usize;
-
-    /// A fixed multiplicative generator of `modulus - 1` order. This element must also be a
-    /// quadratic nonresidue.
-    ///
-    /// Implementations of this trait MUST ensure that this is the generator used to derive
-    /// [`Self::ROOT_OF_UNITY`].
-    const MULTIPLICATIVE_GENERATOR: Self;
-
-    /// `p-2`, which is the exponent used for modular inversion on prime fields as per Fermat's
-    /// Little Theorem.
-    const MINUS_TWO: Self;
-
-    /// 2^-1
-    const TWO_INV: Self;
-
-    /// A primitive root of unity.
-    const ROOT_OF_UNITY: Self;
-
-    /// The modular inverse of [`Self::ROOT_OF_UNITY`].
-    const ROOT_OF_UNITY_INV: Self;
-
-    /// Generator of the `t-order` multiplicative subgroup.
-    ///
-    /// It can be calculated by exponentiating [`Self::MULTIPLICATIVE_GENERATOR`] by `2^s`, where
-    /// `s` is [`Self::S`].
-    const DELTA: Self;
-}
+/// A [`Field`] whose order is a prime number, ie. a field of the form `GF(p)` as opposed to an
+/// extension field `GF(p^n)` with `n > 1`.
+pub trait PrimeField: Field {}
 
 /// A ~64-bit prime field.
 pub trait PrimeField64: Field64 + PrimeField {}
@@ -475,18 +500,3 @@ pub trait PrimeField128: Field128 + PrimeField {}
 
 /// A ~256-bit prime field.
 pub trait PrimeField256: Field256 + PrimeField {}
-
-/// Describes a prime field with a (3^T)-th root of unity.
-pub trait ThreeAdicField: PrimeField {
-    /// The 3-adicity of the field.
-    const T: usize;
-
-    /// Inverse of 3 in the field.
-    const THREE_INV: Self;
-
-    /// The primitive 3-adic root of unity, a number w such that w^(3^T) = 1.
-    const THREE_ADIC_ROOT_OF_UNITY: Self;
-
-    /// The inverse of the root of unity.
-    const THREE_ADIC_ROOT_OF_UNITY_INV: Self;
-}
