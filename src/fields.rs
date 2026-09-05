@@ -54,10 +54,11 @@ pub trait Field:
     + Octal
     + LowerHex
     + UpperHex
-    + FromStr
+    + FromStr<Err: Debug>
     + From<u8>
     + From<u16>
     + TryFrom<usize, Error: Debug>
+    + TryFrom<U256, Error: Debug>
 {
     /// The cardinality of the field.
     ///
@@ -387,7 +388,9 @@ pub trait ThreeAdicField: Field {
 }
 
 /// A ~64-bit [`Field`].
-pub trait Field64: Field + From<u32> + TryFrom<u64, Error: Debug> {
+pub trait Field64:
+    Field + From<u32> + TryFrom<u64, Error: Debug> + TryFrom<u128, Error: Debug>
+{
     /// Returns the little-endian representation of the scalar.
     fn to_le_bytes(&self) -> [u8; 8];
 
@@ -453,9 +456,7 @@ pub trait Field128: Field + From<u32> + From<u64> + TryFrom<u128, Error: Debug> 
 }
 
 /// A ~256-bit [`Field`].
-pub trait Field256:
-    Field + From<u32> + From<u64> + From<u128> + TryFrom<U256, Error: Debug>
-{
+pub trait Field256: Field + From<u32> + From<u64> + From<u128> {
     /// Returns the little-endian representation of the scalar.
     fn to_le_bytes(&self) -> [u8; 32];
 
