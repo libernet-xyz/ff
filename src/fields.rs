@@ -419,12 +419,6 @@ pub trait Field64:
 
     /// Converts the scalar to a 128-bit unsigned integer.
     fn to_u128(&self) -> u128;
-
-    /// Converts the scalar to a 256-bit unsigned integer.
-    fn to_u256(&self) -> U256;
-
-    /// Converts the scalar to a 512-bit unsigned integer.
-    fn to_u512(&self) -> U512;
 }
 
 /// A ~128-bit [`Field`].
@@ -453,12 +447,6 @@ pub trait Field128: Field + From<u32> + From<u64> + TryFrom<u128, Error: Debug> 
 
     /// Returns this scalar as a `u128`.
     fn to_u128(&self) -> u128;
-
-    /// Returns this scalar as a [`U256`].
-    fn to_u256(&self) -> U256;
-
-    /// Returns this scalar as a [`U512`].
-    fn to_u512(&self) -> U512;
 }
 
 /// A ~256-bit [`Field`].
