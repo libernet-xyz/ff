@@ -54,10 +54,11 @@ pub trait Field:
     + Octal
     + LowerHex
     + UpperHex
-    + FromStr
+    + FromStr<Err: Debug>
     + From<u8>
     + From<u16>
     + TryFrom<usize, Error: Debug>
+    + TryFrom<U256, Error: Debug>
 {
     /// The cardinality of the field.
     ///
@@ -369,6 +370,12 @@ pub trait Field:
 
     /// Returns this scalar as a `u16`, or `None` if the value exceeds the 16-bit range.
     fn try_to_u16(&self) -> Option<u16>;
+
+    /// Returns this scalar as a [`U256`].
+    fn to_u256(&self) -> U256;
+
+    /// Returns this scalar as a [`U512`].
+    fn to_u512(&self) -> U512;
 }
 
 /// Describes a field with a (3^T)-th root of unity.
@@ -387,7 +394,9 @@ pub trait ThreeAdicField: Field {
 }
 
 /// A ~64-bit [`Field`].
-pub trait Field64: Field + From<u32> + TryFrom<u64, Error: Debug> {
+pub trait Field64:
+    Field + From<u32> + TryFrom<u64, Error: Debug> + TryFrom<u128, Error: Debug>
+{
     /// Returns the little-endian representation of the scalar.
     fn to_le_bytes(&self) -> [u8; 8];
 
@@ -453,9 +462,7 @@ pub trait Field128: Field + From<u32> + From<u64> + TryFrom<u128, Error: Debug> 
 }
 
 /// A ~256-bit [`Field`].
-pub trait Field256:
-    Field + From<u32> + From<u64> + From<u128> + TryFrom<U256, Error: Debug>
-{
+pub trait Field256: Field + From<u32> + From<u64> + From<u128> {
     /// Returns the little-endian representation of the scalar.
     fn to_le_bytes(&self) -> [u8; 32];
 
@@ -480,12 +487,6 @@ pub trait Field256:
 
     /// Returns this scalar as a `u128`, or `None` if the value exceeds the 128-bit range.
     fn try_to_u128(&self) -> CtOption<u128>;
-
-    /// Returns this scalar as a [`U256`].
-    fn to_u256(&self) -> U256;
-
-    /// Returns this scalar as a [`U512`].
-    fn to_u512(&self) -> U512;
 }
 
 /// A [`Field`] whose order is a prime number, ie. a field of the form `GF(p)` as opposed to an
