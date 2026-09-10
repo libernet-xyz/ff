@@ -479,7 +479,11 @@ pub trait Field256: Field + From<u32> + From<u64> + From<u128> {
 
 /// A [`Field`] whose order is a prime number, ie. a field of the form `GF(p)` as opposed to an
 /// extension field `GF(p^n)` with `n > 1`.
-pub trait PrimeField: Field {}
+pub trait PrimeField: Field {
+    /// The smallest integer that's coprime with `MODULUS - 1`. This is used for the S-box of
+    /// Poseidon and possibly other algebraic hashes.
+    const ALPHA: usize;
+}
 
 /// A ~64-bit prime field.
 pub trait PrimeField64: Field64 + PrimeField {}
