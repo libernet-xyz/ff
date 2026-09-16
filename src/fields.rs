@@ -393,6 +393,34 @@ pub trait ThreeAdicField: Field {
     const THREE_ADIC_ROOT_OF_UNITY_INV: Self;
 }
 
+/// A ~32-bit [`Field`].
+pub trait Field32:
+    Field + TryFrom<u32, Error: Debug> + TryFrom<u64, Error: Debug> + TryFrom<u128, Error: Debug>
+{
+    /// Returns the little-endian representation of the scalar.
+    fn to_le_bytes(&self) -> [u8; 4];
+
+    /// Returns the big-endian representation of the scalar.
+    fn to_be_bytes(&self) -> [u8; 4];
+
+    /// Constructs a scalar from a 128-bit unsigned value, using modular reduction to fit it into
+    /// the scalar range.
+    fn from_u128_mod_n(u128: u128) -> Self;
+
+    /// Constructs a scalar from a 256-bit unsigned value, using modular reduction to fit it into
+    /// the scalar range.
+    fn from_u256_mod_n(u256: U256) -> Self;
+
+    /// Converts the scalar to a 32-bit unsigned integer.
+    fn to_u32(&self) -> u32;
+
+    /// Converts the scalar to a 64-bit unsigned integer.
+    fn to_u64(&self) -> u64;
+
+    /// Converts the scalar to a 128-bit unsigned integer.
+    fn to_u128(&self) -> u128;
+}
+
 /// A ~64-bit [`Field`].
 pub trait Field64:
     Field + From<u32> + TryFrom<u64, Error: Debug> + TryFrom<u128, Error: Debug>
@@ -484,6 +512,9 @@ pub trait PrimeField: Field {
     /// Poseidon and possibly other algebraic hashes.
     const ALPHA: usize;
 }
+
+/// A ~32-bit prime field.
+pub trait PrimeField32: Field32 + PrimeField {}
 
 /// A ~64-bit prime field.
 pub trait PrimeField64: Field64 + PrimeField {}
