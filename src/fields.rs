@@ -73,7 +73,11 @@ pub trait Field:
     /// must be set to `Self`.
     ///
     /// NOTE: `BaseField == Self` iff [`Self::MODULUS`] == [`Self::CHARACTERISTIC`].
-    type BaseField: Field;
+    type BaseField: Field
+        + Add<Self, Output = Self>
+        + Sub<Self, Output = Self>
+        + Mul<Self, Output = Self>
+        + Div<Self, Output = Self>;
 
     /// The cardinality of the field.
     ///
