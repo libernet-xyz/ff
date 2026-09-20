@@ -26,6 +26,7 @@ pub trait Field:
     + Clone
     + Eq
     + Ord
+    + From<Self::BaseField>
     + ConstantTimeEq
     + ConstantTimeGreater
     + ConstantTimeLess
@@ -34,19 +35,27 @@ pub trait Field:
     + for<'a> Add<&'a Self, Output = Self>
     + AddAssign<Self>
     + for<'a> AddAssign<&'a Self>
+    + Add<Self::BaseField, Output = Self>
+    + AddAssign<Self::BaseField>
     + Neg<Output = Self>
     + Sub<Output = Self>
     + for<'a> Sub<&'a Self, Output = Self>
     + SubAssign<Self>
     + for<'a> SubAssign<&'a Self>
+    + Sub<Self::BaseField, Output = Self>
+    + SubAssign<Self::BaseField>
     + Mul<Output = Self>
     + for<'a> Mul<&'a Self, Output = Self>
     + MulAssign<Self>
     + for<'a> MulAssign<&'a Self>
+    + Mul<Self::BaseField, Output = Self>
+    + MulAssign<Self::BaseField>
     + Div<Output = Self>
     + for<'a> Div<&'a Self, Output = Self>
     + DivAssign<Self>
     + for<'a> DivAssign<&'a Self>
+    + Div<Self::BaseField, Output = Self>
+    + DivAssign<Self::BaseField>
     + Sum
     + Product
     + Display
@@ -60,6 +69,12 @@ pub trait Field:
     + TryFrom<usize, Error: Debug>
     + TryFrom<U256, Error: Debug>
 {
+    /// If `Self` is an extension field, `BaseField` is the corresponding base field; otherwise it
+    /// must be set to `Self`.
+    ///
+    /// NOTE: `BaseField == Self` iff [`Self::MODULUS`] == [`Self::CHARACTERISTIC`].
+    type BaseField: Field;
+
     /// The cardinality of the field.
     ///
     /// Must be consistent with the [`Self::MAX`] constant.
@@ -507,20 +522,20 @@ pub trait Field256: Field + From<u32> + From<u64> + From<u128> {
 
 /// A [`Field`] whose order is a prime number, ie. a field of the form `GF(p)` as opposed to an
 /// extension field `GF(p^n)` with `n > 1`.
-pub trait PrimeField: Field {
+pub trait PrimeField: Field<BaseField = Self> {
     /// The smallest integer that's coprime with `MODULUS - 1`. This is used for the S-box of
     /// Poseidon and possibly other algebraic hashes.
     const ALPHA: usize;
 }
 
-/// A ~32-bit prime field.
+/// A ~32-bit [`PrimeField`].
 pub trait PrimeField32: Field32 + PrimeField {}
 
-/// A ~64-bit prime field.
+/// A ~64-bit [`PrimeField`].
 pub trait PrimeField64: Field64 + PrimeField {}
 
-/// A ~128-bit prime field.
+/// A ~128-bit [`PrimeField`].
 pub trait PrimeField128: Field128 + PrimeField {}
 
-/// A ~256-bit prime field.
+/// A ~256-bit [`PrimeField`].
 pub trait PrimeField256: Field256 + PrimeField {}
