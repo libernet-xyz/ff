@@ -618,6 +618,8 @@ impl Field for Scalar {
 
     const LEN: usize = 32;
 
+    const NUM_BITS: usize = 255;
+
     const ZERO: Self = Self(0, 0, 0, 0);
 
     const ONE: Self = Self::R;
@@ -990,6 +992,11 @@ mod tests {
             Scalar::CHARACTERISTIC,
             <BlstScalar as ff::PrimeField>::MODULUS
         );
+        let modulus: U256 = Scalar::MODULUS.parse().unwrap();
+        assert_eq!(modulus >> (Scalar::LEN * 8), U256::zero());
+        assert_ne!(modulus >> ((Scalar::LEN - 1) * 8), U256::zero());
+        assert_eq!(modulus >> Scalar::NUM_BITS, U256::zero());
+        assert_ne!(modulus >> (Scalar::NUM_BITS - 1), U256::zero());
     }
 
     #[test]

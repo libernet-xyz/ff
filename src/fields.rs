@@ -97,7 +97,15 @@ pub trait Field:
     const LEN: usize;
 
     /// The number of bits required to represent a value.
-    const NUM_BITS: usize = Self::LEN * 8;
+    ///
+    /// This isn't simply [`Self::LEN`] * 8, it's the precise number of bits used to represent a
+    /// field element (e.g. 255 for BlueSky, 31 for KoalaBear, 248 for KoalaBear^8, etc.).
+    ///
+    /// With the exception of binary tower fields, the actual "number of bits used" to represent a
+    /// field element is always a fractional value between `NUM_BITS` and `NUM_BITS - 1`. That is
+    /// because non-binary fields range to a fraction of a power of 2. For example KoalaBear takes
+    /// about 99.22% of the 31-bit range.
+    const NUM_BITS: usize;
 
     /// Same as [`Self::NUM_BITS`]. Provided for consistency with native Rust types.
     const BITS: usize = Self::NUM_BITS;
