@@ -205,7 +205,7 @@ pub trait Field:
         self.square() * self
     }
 
-    /// Returns the modular inverse of `self, or `None` if `self` is zero.
+    /// Returns the modular inverse of `self`, or `None` if `self` is zero.
     fn invert(&self) -> CtOption<Self>;
 
     /// Returns the modular inverse of `self`, assuming `self` is not zero and panicking otherwise.
@@ -218,7 +218,7 @@ pub trait Field:
         self.invert().unwrap_or(Self::ZERO)
     }
 
-    /// Returns the modular inverse of `self, or `None` if `self` is zero.
+    /// Returns the modular inverse of `self`, or `None` if `self` is zero.
     fn invert_vartime(&self) -> Option<Self>;
 
     /// Inverts all the provided values in place using Montgomery batch inversion.
