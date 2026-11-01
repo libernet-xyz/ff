@@ -369,12 +369,14 @@ pub trait Field:
     /// The Frobenius map fixes every value of the base field and preserves both addition and
     /// multiplication, so it commutes with the evaluation of any polynomial `f` with base field
     /// coefficients: `f(x).frobenius() == f(x.frobenius())`. Applying it
-    /// [`Self::EXTENSION_DEGREE`] times yields the identity, so in a prime field it's the identity.
+    /// [`EXTENSION_DEGREE`][`Self::EXTENSION_DEGREE`] times yields the identity, so in a prime
+    /// field it's the identity.
     ///
     /// The default implementation raises to the [`Self::BaseField`] modulus with a
     /// square-and-multiply loop. The exponent is public, so the running time doesn't depend on
-    /// `self`. Extension fields can usually provide a much faster implementation, eg. binomial
-    /// extensions only need to scale each coordinate by a constant.
+    /// `self`. Implementors can usually provide much faster implementations: binomial extensions
+    /// only need to scale each coordinate by a constant for example, while prime fields can simply
+    /// return a copy of `self`.
     fn frobenius(&self) -> Self {
         let exponent: U256 = Self::BaseField::MODULUS.parse().unwrap();
         let mut result = Self::ONE;

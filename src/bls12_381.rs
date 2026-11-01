@@ -763,6 +763,10 @@ impl Field for Scalar {
         result
     }
 
+    fn frobenius(&self) -> Self {
+        *self
+    }
+
     fn div_int(&self, rhs: &Self) -> (Self, Self) {
         assert!(!bool::from(rhs.is_zero()));
         let lhs = self.to_u256();
