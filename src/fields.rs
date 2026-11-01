@@ -440,7 +440,7 @@ pub trait Field:
     /// Constructs a value from its [`EXTENSION_DEGREE`][`Self::EXTENSION_DEGREE`] coordinates over
     /// [`Self::BaseField`].
     ///
-    /// The coordinates are specified in little-endian / ascending-degree order.
+    /// The coordinates are specified in little-endian.
     ///
     /// REQUIRES: `coordinates` must have exactly [`EXTENSION_DEGREE`][`Self::EXTENSION_DEGREE`]
     /// elements.
@@ -448,8 +448,8 @@ pub trait Field:
 
     /// Writes the coordinates of this value over [`Self::BaseField`] into `coordinates`.
     ///
-    /// This is the inverse of [`Self::from_base_coordinates`] and uses the same little-endian /
-    /// ascending-degree order.
+    /// This is the inverse of [`Self::from_base_coordinates`] and uses the same little-endian
+    /// order.
     ///
     /// REQUIRES: `coordinates` must have exactly [`EXTENSION_DEGREE`][`Self::EXTENSION_DEGREE`]
     /// elements.
