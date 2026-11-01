@@ -79,7 +79,7 @@ pub trait Field:
         + Mul<Self, Output = Self>
         + Div<Self, Output = Self>;
 
-    /// The cardinality of the field.
+    /// The cardinality of the field, as a hexadecimal string with the `0x` prefix.
     ///
     /// Must be consistent with the [`Self::MAX`] constant.
     const MODULUS: &'static str;
@@ -88,10 +88,17 @@ pub trait Field:
     /// `n * Self::ONE == Self::ZERO`.
     ///
     /// This is always a prime number, and [`Self::MODULUS`] is always a power of it (possibly the
-    /// first power, in which case the two constants coincide): a prime field has
+    /// first power, in which case the two constants coincide). A prime field has
     /// `CHARACTERISTIC == MODULUS`, while an extension field of degree `n` over a field of
     /// characteristic `p` has `MODULUS == p^n` and `CHARACTERISTIC == p`.
     const CHARACTERISTIC: &'static str;
+
+    /// The degree of this field over [`Self::BaseField`], ie. the number of base field coordinates
+    /// of a value (see [`Self::from_base_coordinates`] and [`Self::to_base_coordinates`]).
+    ///
+    /// This is 1 for a prime field and `n` for an extension field of degree `n`, in which case
+    /// [`Self::MODULUS`] is the `n`-th power of [`Self::CHARACTERISTIC`].
+    const EXTENSION_DEGREE: usize;
 
     /// The number of bytes required to represent a value.
     const LEN: usize;
@@ -356,6 +363,30 @@ pub trait Field:
         result
     }
 
+    /// Applies the Frobenius automorphism of this field over [`Self::BaseField`], ie. raises this
+    /// value to the cardinality of the base field.
+    ///
+    /// The Frobenius map fixes every value of the base field and preserves both addition and
+    /// multiplication, so it commutes with the evaluation of any polynomial `f` with base field
+    /// coefficients: `f(x).frobenius() == f(x.frobenius())`. Applying it
+    /// [`Self::EXTENSION_DEGREE`] times yields the identity, so in a prime field it's the identity.
+    ///
+    /// The default implementation raises to the [`Self::BaseField`] modulus with a
+    /// square-and-multiply loop. The exponent is public, so the running time doesn't depend on
+    /// `self`. Extension fields can usually provide a much faster implementation, eg. binomial
+    /// extensions only need to scale each coordinate by a constant.
+    fn frobenius(&self) -> Self {
+        let exponent: U256 = Self::BaseField::MODULUS.parse().unwrap();
+        let mut result = Self::ONE;
+        for i in (0..exponent.bits()).rev() {
+            result = result.square();
+            if exponent.bit(i) {
+                result *= self;
+            }
+        }
+        result
+    }
+
     /// Performs integer division by `rhs` and returns a (quotient, remainder) pair. Panics if `rhs`
     /// is zero.
     fn div_int(&self, rhs: &Self) -> (Self, Self);
@@ -403,6 +434,24 @@ pub trait Field:
 
     /// Returns this scalar as a [`U512`].
     fn to_u512(&self) -> U512;
+
+    /// Constructs a value from its [`EXTENSION_DEGREE`][`Self::EXTENSION_DEGREE`] coordinates over
+    /// [`Self::BaseField`].
+    ///
+    /// The coordinates are specified in little-endian / ascending-degree order.
+    ///
+    /// REQUIRES: `coordinates` must have exactly [`EXTENSION_DEGREE`][`Self::EXTENSION_DEGREE`]
+    /// elements.
+    fn from_base_coordinates(coordinates: &[Self::BaseField]) -> Self;
+
+    /// Writes the coordinates of this value over [`Self::BaseField`] into `coordinates`.
+    ///
+    /// This is the inverse of [`Self::from_base_coordinates`] and uses the same little-endian /
+    /// ascending-degree order.
+    ///
+    /// REQUIRES: `coordinates` must have exactly [`EXTENSION_DEGREE`][`Self::EXTENSION_DEGREE`]
+    /// elements.
+    fn to_base_coordinates(&self, coordinates: &mut [Self::BaseField]);
 }
 
 /// Describes a field with a (3^T)-th root of unity.
